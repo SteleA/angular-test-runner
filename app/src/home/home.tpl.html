@@ -1,0 +1,150 @@
+<div class="container top25" id="home">
+  <div class="row bottom25">
+    <div class="pull-left logo animated" ng-class="{'pulse infinite': vm.ui.building}">
+      <img src="https://wiki.jenkins-ci.org/download/attachments/2916393/master-jenkins.svg"/>
+    </div>
+    <div class="pull-right top20">
+      <button type="button" ng-click="vm.fn.clearBuilds()" class="btn btn-danger">Clear Builds</button>
+      <button type="button" ng-click="vm.fn.addBuild()" class="btn btn-primary">Add Build</button>
+    </div>
+  </div>
+  <div class="header-row row">
+    <div class="col-xs-2">Changelist / Build</div>
+    <div class="col-xs-2">Owner</div>
+    <div class="col-xs-2">Time Started</div>
+    <div class="col-xs-2">Status</div>
+    <div class="col-xs-1">Metrics</div>
+    <div class="col-xs-1">Build</div>
+    <div class="col-xs-1">Unit Test</div>
+    <div class="col-xs-1">Functional Test</div>
+  </div>
+  <div class="test-block row {{build.state}} animated"
+    ng-repeat="build in vm.data.builds | orderBy:'-buildNumber'"
+    ng-class="{'expanded': build.expanded, 'flash': build.state === 'running', 'fadeInLeftBig': build.state === 'pending'}">
+    <div class="clearfix" ng-click="vm.fn.expandBuild(build)">
+      <div class="type col-xs-2">
+        <i class="fa" ng-class="{'fa-desktop': build.type === 'build', 'fa-fire': build.type === 'firewall'}"></i>
+        <span class="name">{{build.name}}</span>
+      </div>
+      <div class="owner col-xs-2">{{build.owner}}</div>
+      <div class="date-started col-xs-2">
+        <span class="date">{{build.date | date:'short'}} </span>
+      </div>
+      <div class="state col-xs-2 animated infinite">{{build.state}}</div>
+      <div class="metrics col-xs-1 test-progress">
+        <uib-progressbar value="build.progress.metrics"></uib-progressbar>
+      </div>
+      <div class="build col-xs-1 test-progress">
+        <uib-progressbar value="build.progress.build"></uib-progressbar>
+      </div>
+      <div class="unit-test col-xs-1 test-progress">
+        <uib-progressbar value="build.progress.unitTest"></uib-progressbar>
+      </div>
+      <div class="functional-test col-xs-1 test-progress">
+        <uib-progressbar value="build.progress.functionalTest"></uib-progressbar>
+      </div>
+    </div>
+    <div class="more-info-block col-xs-12">
+      <div class="block metrics-block">
+        <div class="inner-block clearfix">
+          <div class="col-sm-12 block-title">
+            <span>Metrics</span>
+          </div>
+          <div class="col-sm-6 metric" ng-class="{'positive': build.metrics.testPassed, 'negative': !build.metrics.testPassed}">
+            <i class="fa" ng-class="{'fa-arrow-circle-up': build.metrics.testPassed, 'fa-arrow-circle-down': !build.metrics.testPassed}" aria-hidden="true"></i>
+            <span class="point">{{build.metrics.test}}</span>
+            <span class="name">Test</span>
+          </div>
+          <div class="col-sm-6 metric" ng-class="{'positive': build.metrics.maintainPassed, 'negative': !build.metrics.maintainPassed}">
+            <i class="fa" ng-class="{'fa-arrow-circle-up': build.metrics.maintainPassed, 'fa-arrow-circle-down': !build.metrics.maintainPassed}"></i>
+            <span class="point">{{build.metrics.maintainability}}</span>
+            <span class="name">Maintainability</span>
+          </div>
+          <div class="col-sm-6 metric forward">
+            <i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
+            <span class="point">{{build.metrics.security}}</span>
+            <span class="name">Security</span>
+          </div>
+          <div class="col-sm-6 metric forward">
+            <i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
+            <span class="point">{{build.metrics.workmanship}}</span>
+            <span class="name">Workmanship</span>
+          </div>
+        </div>
+      </div>
+      <div class="block build-block">
+        <div class="inner-block clearfix">
+          <div class="col-sm-12 block-title">
+            <span>Build</span>
+          </div>
+          <div class="actions">
+            <div class="col-sm-6 debug">
+              <i class="fa fa-bug"></i>
+              <span>Debug</span>
+            </div>
+            <div class="col-sm-6 release">
+              <i class="fa fa-desktop"></i>
+              <span>Release</span>
+            </div>
+          </div>
+          <div class="date-wrapper">{{build.build.lastBuild | date:'short'}}</div>
+        </div>
+      </div>
+      <div class="block unit-test-block">
+        <div class="inner-block clearfix">
+          <div class="col-sm-12 block-title">
+            <span>Unit Test</span>
+          </div>
+          <div class="tests-passed">
+            <span class="percent">{{build.unitTest.percent | number:0}}%</span>
+            <span class="text">passed</span>
+          </div>
+          <highchart ng-if="build.showChart" id="unit-test-chart" config="build.chart.unitTest"></highchart>
+          <uib-progressbar value="build.unitTest.coverage">{{build.unitTest.coverage}}% Coverage</uib-progressbar>
+        </div>
+      </div>
+      <div class="block functional-test-block">
+        <div class="inner-block clearfix">
+          <div class="col-sm-12 block-title">
+            <span>Functional Test</span>
+          </div>
+          <div class="tests-passed">
+            <span class="percent">{{build.functionalTest.percent | number:0}}%</span>
+            <span class="text">passed</span>
+          </div>
+          <highchart ng-if="build.showChart" id="unit-test-chart" config="build.chart.functionalTest"></highchart>
+          <uib-progressbar value="build.functionalTest.coverage">{{build.functionalTest.coverage}}% Coverage</uib-progressbar>
+        </div>
+      </div>
+      <div class="block result-block">
+        <div class="inner-block clearfix">
+          <div class="col-sm-12 block-title">
+            <span>Results</span>
+          </div>
+          <div class="message-wrapper">
+            <span class="subtitle">{{build.result.subTitle}}</span>
+            <span class="message">{{build.result.message}}</span>
+            <!-- Action buttons for state: rejected -->
+            <button type="button" class="btn btn-primary" ng-if="build.state === 'rejected'">Find Issue</button>
+            <!-- Action buttons for type: firewall & state: complete  -->
+            <button type="button" class="btn btn-primary" ng-if="build.state === 'complete' && build.type === 'firewall'">Merged Build</button>
+            <!-- Action buttons for type: build & state: complete -->
+            <div class="btn-group" uib-dropdown is-open="status.isopen" ng-if="build.state === 'complete' && build.type === 'build'">
+              <button id="single-button" type="button" class="btn btn-primary" uib-dropdown-toggle ng-disabled="disabled">
+                Deploy to <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li role="menuitem"><a href="#">Production</a></li>
+                <li role="menuitem"><a href="#">Stage</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Empty state message -->
+  <div class="text-center top50" ng-if="vm.data.builds.length === 0 && !vm.ui.start">
+    <span class="font32">Looks a bit empty here. Add a build to get started!</span>
+  </div>
+</div>
