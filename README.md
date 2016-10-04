@@ -37,7 +37,8 @@ While tests are running the progress bars are being run sequentially with a fill
 
 How to run the code.
 
-```run 'npm install'
+```
+run 'npm install'
 
 run 'bower install'
 
